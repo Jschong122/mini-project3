@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,26 +11,29 @@ function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const router = useRouter();
 
   async function handleSubmit(e) {
     e.preventDefault();
 
     try {
       const result = await signIn("credentials", {
+        username,
+        password,
         redirect: false,
-        username: username,
-        password: password,
       });
 
       if (result.error) {
         setError(result.error);
-        console.log(error);
+        toast.error(result.error);
       } else {
-        toast.success("Login Successful");
-        window.location.href = "/";
+        toast.success("login success");
+        router.push("/");
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      setError("login failed");
+      toast.error("error login");
     }
   }
 

@@ -21,7 +21,7 @@ function UserLeaveRequest({ leaveRequests, setLeaveRequests }) {
       return;
     }
     try {
-      const response = await fetch(`/api/leave-request?id=${requestId}`, {
+      const response = await fetch(`http://localhost:5001/leave-requests`, {
         method: "DELETE",
       });
 
@@ -42,36 +42,40 @@ function UserLeaveRequest({ leaveRequests, setLeaveRequests }) {
   };
 
   const editRequest = async (requestId, updatedData) => {
-    console.log("Sending edit request for ID:", requestId);
+    console.log(updatedData, "updatedData");
+    console.log(requestId, "requestId");
 
     try {
-      const response = await fetch(`/api/leave-request?id=${requestId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedData),
-      });
-      console.log("response", response.data);
+      const response = await fetch(
+        `http://localhost:5001/leave-requests/${requestId}`,
+        {
+          method: "PUT",
 
-      if (response.ok) {
-        const updatedRequest = await response.json();
+          body: JSON.stringify(updatedData),
+        }
+      );
 
-        setLeaveRequests((prevRequests) =>
-          prevRequests.map((request) =>
-            request.id === requestId ? updatedRequest : request
-          )
-        );
-
-        setEditingRequest(null);
-        toast.success("Request updated successfully");
-      } else {
+      if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to update request");
       }
+
+      const updatedRequest = await response.json();
+
+      setLeaveRequests((prevRequests) =>
+        prevRequests.map((request) =>
+          request.id === requestId ? updatedRequest : request
+        )
+      );
+
+      setEditingRequest(null);
+      toast.success("Request updated successfully");
     } catch (error) {
       console.error("Error updating request:", error);
-      toast.error("Error updating request: " + error.message);
+      toast.error("Failed to update request: " + error.message);
     }
   };
+
   const handleSort = (sortedRequests) => {
     setLeaveRequests(sortedRequests);
   };
@@ -79,6 +83,7 @@ function UserLeaveRequest({ leaveRequests, setLeaveRequests }) {
   return (
     <div>
       <SortingFunction leaveRequests={leaveRequests} onSort={handleSort} />
+
       <h1 className="text-2xl font-bold mb-3"> Dashboard </h1>
       <table className=" table-auto border-collapse lg:w-[1000px]">
         <thead>

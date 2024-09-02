@@ -1,24 +1,50 @@
+const session = require("express-session");
 const { User } = require("../models/user.model");
 
-async function getAllUsers(req, res) {
-  console.log(res);
+exports.login = async (req, res) => {
   try {
-    const users = await User.findAll();
-    res.status(200).json(users);
+    const { username, password } = req.body;
+    const user = await User.findOne({ where: { username } });
+    if (!user || user.password !== password) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+    req.session.user_id = user.id;
+    res.json({
+      id: user.id,
+      username: user.username,
+      role: user.role,
+    });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Login failed", message: error.message });
   }
-}
+};
 
-async function addUser(req, res) {
+exports.logout = (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res
+        .status(500)
+        .json({ message: "Could not log out, please try again" });
+    }
+    res.json({ message: "Logout successful" });
+  });
+};
+
+exports.getProfile = async (req, res) => {
   try {
-    const users = await User.create(req.body);
-    res.status(200).json(users);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: error.message });
-  }
-}
+    const user = await User.findByPk(req.session.user_id, {
+      attributes: { exclude: ["password"] },
+    });
 
-module.exports = { getAllUsers, addUser };
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error("Get profile error:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to get user profile", error: error.message });
+  }
+};

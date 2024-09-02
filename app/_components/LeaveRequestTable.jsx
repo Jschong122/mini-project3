@@ -13,30 +13,38 @@ function LeaveRequestTable() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await fetch(
-          `/api/leave-request?username=${session?.user?.username}`
-        );
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Something went wrong");
-        }
+  console.log("session in LeaveRequestTable:", session);
 
-        const data = await response.json();
-        setLeaveRequests(data);
-        console.log(data);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    if (session?.user?.username) {
-      fetchData();
-    }
+  useEffect(() => {
+    fetchData();
   }, [session]);
+
+  async function fetchData() {
+    if (!session?.user?.role) return;
+
+    try {
+      let url;
+      if (session.user.role === "Manager") {
+        url = `http://localhost:5001/leave-requests`;
+      } else {
+        url = `http://localhost:5001/leave-requests/${session.user.id}`;
+      }
+
+      const response = await fetch(url);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "error when fetching data");
+      }
+
+      const data = await response.json();
+      setLeaveRequests(data);
+      console.log(data, "after fetch data");
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   const handleUpdateLeaveRequests = (updatedRequests) => {
     console.log("updatedRequests:", updatedRequests);
@@ -59,11 +67,12 @@ function LeaveRequestTable() {
 
       {session?.user?.role === "Manager" ? (
         <div>
-          <ManagerRole />
+          <ManagerRole session={session} />
         </div>
       ) : (
         <div>
           <UserLeaveRequest
+            session={session}
             leaveRequests={leaveRequests}
             setLeaveRequests={handleUpdateLeaveRequests}
           />

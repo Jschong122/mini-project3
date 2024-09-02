@@ -1,8 +1,6 @@
-// managerFunctions.js
-
 export const fetchAllLeaveRequests = async () => {
   try {
-    const response = await fetch("/api/manager");
+    const response = await fetch("http://localhost:5001/leave-requests");
     if (!response.ok) {
       console.error(`HTTP error! status: ${response.status}`);
       const text = await response.text();
@@ -16,15 +14,18 @@ export const fetchAllLeaveRequests = async () => {
   }
 };
 
-export const updateLeaveRequestStatus = async (requestId, newStatus) => {
+export const updateLeaveRequestStatus = async (session, newStatus) => {
   try {
-    const response = await fetch(`/api/manager?id=${requestId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ status: newStatus }),
-    });
+    const response = await fetch(
+      `http://localhost:5001/leave-requests/${session.user.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      }
+    );
     if (!response.ok) {
       throw new Error("Failed to update leave request status");
     }

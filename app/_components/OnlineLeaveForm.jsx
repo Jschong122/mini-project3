@@ -29,18 +29,21 @@ function OnlineLeaveForm() {
       startDate,
       endDate,
       reason,
-      submittedDate: new Date().toISOString().split("T")[0],
       username: session.user.username,
+      user_id: session.user.id,
     };
 
     try {
-      const response = await fetch("/api/leave-request", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(leaveData),
-      });
+      const response = await fetch(
+        "http://localhost:5001/leave-requests/create",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(leaveData),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to submit leave request");
