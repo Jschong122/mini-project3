@@ -1,8 +1,8 @@
 const { DataTypes, Model } = require("sequelize");
 const { database } = require("../dbConnect");
 
-const LeaveRequest = database.define(
-  "leave_request",
+const LeaveRequests = database.define(
+  "leave_requests",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -11,6 +11,11 @@ const LeaveRequest = database.define(
     },
     user_id: {
       type: DataTypes.INTEGER,
+      field: "user_id",
+      allowNull: false,
+    },
+    username: {
+      type: DataTypes.STRING(50),
       allowNull: false,
     },
     startDate: {
@@ -36,8 +41,11 @@ const LeaveRequest = database.define(
 
   {
     sequelize: database,
+    modelName: "LeaveRequests",
+    tableName: "leave_requests",
     timestamps: false,
     updatedAt: false,
   }
 );
-module.exports = { LeaveRequest };
+
+module.exports = { LeaveRequests };

@@ -16,21 +16,27 @@ import SortingFunction from "../_components/SortingFunction";
 import { Dropdown, IconDropdown } from "react-day-picker";
 import { toast } from "react-toastify";
 
-const ManagerRole = () => {
+const ManagerRole = (session) => {
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [editingRequest, setEditingRequest] = useState(null);
   const [approve, setApprove] = useState("");
   const [reject, setReject] = useState("");
 
-  const editRequest = async (requestId, updatedData) => {
-    console.log("Sending edit request for ID:", requestId);
+  const sessionID = session.session.user.id;
+  console.log("sessionID", sessionID);
+
+  const editRequest = async (updatedData) => {
+    console.log("Sending edit request for ID:", sessionID);
 
     try {
-      const response = await fetch(`/api/leave-request?id=${requestId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedData),
-      });
+      const response = await fetch(
+        `http://localhost:5001/leave-requests/${sessionID}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedData),
+        }
+      );
       console.log("response", response.data);
 
       if (response.ok) {
